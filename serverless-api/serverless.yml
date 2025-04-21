@@ -32,19 +32,21 @@ plugins:
   - serverless-offline
   - serverless-esbuild
 
-# functions:
-#   addMessage:
-#       handler: ../src/handlers/test.handler
-#       events:
-#         - http:
-#             path: v1/conversations/{conversationId}/messages
-#             method: post
-#             integration: aws
-#             request:
-#               uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
-#               parameters:
-#                 paths:
-#                   conversationId: true
+functions:
+  healthCheck:
+    handler: ../src/handlers/healthCheck.handler
+  # addMessage:
+  #     handler: ../src/handlers/test.handler
+  #     events:
+  #       - http:
+  #           path: v1/conversations/{conversationId}/messages
+  #           method: post
+            # integration: aws
+            # request:
+            #   uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
+            #   parameters:
+            #     paths:
+            #       conversationId: true
 
 resources:
   Resources:
