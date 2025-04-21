@@ -7,7 +7,9 @@ custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
   stage: '${opt:stage, "local"}'
   stackName: '${self:service}'
-  commAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
+  lambdaAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
+  lambdaRegion: ${self:provider.region}
+  lambdaFunctionName: addMessage
   # commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:ssm:${self:custom.secretsPrefix}-${opt:stage}"
   customDomain:
     domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
@@ -31,22 +33,40 @@ plugins:
   - serverless-esbuild
 
 functions:
-  healthCheck:
-    handler: ../src/handlers/healthCheck.handler
-    events:
-      - http:
-          method: get
-          path: v1/health-check
-
   addMessage:
-    handler: dummy.handler
-    package:
-      exclude:
-        - "**/*"
-    events:
-      - http:
-          method: post
-          path: v1/conversations/{conversationId}/messages
-          integration: lambda
-          request:
-            uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.secretsPrefix}-${opt:stage}-addMessage/invocations
+      events:
+        - http:
+            path: v1/conversations/{conversationId}/messages
+            method: post
+            integration: aws
+            request:
+              uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
+              parameters:
+                paths:
+                  conversationId: true
+
+resources:
+  Resources:
+    ApiGatewayRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: apigateway.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: LambdaInvokePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action: lambda:InvokeFunction
+                  Resource: !Sub arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:*
+
+Outputs:
+    ApiUrl:
+      Description: URL of the API
+      Value: !Sub https://${RestApiId}.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}
