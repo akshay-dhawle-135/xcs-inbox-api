@@ -7,12 +7,14 @@ custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
   stage: '${opt:stage, "local"}'
   stackName: '${self:service}'
-  lambdaAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
+  # lambdaAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
+  lambdaAccountId: "599272883479"
   lambdaRegion: ${self:provider.region}
   lambdaFunctionName: addMessage
   # commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:ssm:${self:custom.secretsPrefix}-${opt:stage}"
   customDomain:
-    domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+    # domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+    domainName: "akshaydevzone.site"
     stage: ${opt:stage, "local"}
     basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox-api"}
     createRoute53Record: false
@@ -32,163 +34,21 @@ plugins:
   - serverless-offline
   - serverless-esbuild
 
+package:
+  individually: true
+  exclude: 
+    - ./*  
+
 functions:
-  healthCheck:
-    handler: ../src/handlers/healthCheck.handler
-  # addMessage:
-  #     handler: ../src/handlers/test.handler
-  #     events:
-  #       - http:
-  #           path: v1/conversations/{conversationId}/messages
-  #           method: post
-  # integration: aws
-  # request:
-  #   uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
-  #   parameters:
-  #     paths:
-  #       conversationId: true
-
-resources:
-  Resources:
-    # API Gateway Rest API
-    ApiGatewayRestApi:
-      Type: AWS::ApiGateway::RestApi
-      Properties:
-        Name: ${self:service}-api
-        Description: API Gateway for cross-account Lambda integration
-
-    # Resource for /v1
-    ApiGatewayResourceV1:
-      Type: AWS::ApiGateway::Resource
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
-        PathPart: v1
-
-    # Resource for /v1/conversations
-    ApiGatewayResourceConversations:
-      Type: AWS::ApiGateway::Resource
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        ParentId: !Ref ApiGatewayResourceV1
-        PathPart: conversations
-
-    # Resource for /v1/conversations/{conversationId}
-    ApiGatewayResourceConversationId:
-      Type: AWS::ApiGateway::Resource
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        ParentId: !Ref ApiGatewayResourceConversations
-        PathPart: '{conversationId}'
-
-    # Resource for /v1/conversations/{conversationId}/messages
-    ApiGatewayResourceMessages:
-      Type: AWS::ApiGateway::Resource
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        ParentId: !Ref ApiGatewayResourceConversationId
-        PathPart: messages
-
-    # POST method for /v1/conversations/{conversationId}/messages
-    ApiGatewayMethod:
-      Type: AWS::ApiGateway::Method
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        ResourceId: !Ref ApiGatewayResourceMessages
-        HttpMethod: POST
-        AuthorizationType: NONE
-        RequestParameters:
-          method.request.path.conversationId: true
-        Integration:
-          Type: AWS
-          IntegrationHttpMethod: POST
-          Uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
-          Credentials: !GetAtt ApiGatewayRole.Arn
-          TimeoutInMillis: 29000
-          RequestTemplates:
-            application/json: |
-              {
-                "conversationId": "$input.params('conversationId')",
-                "body": $input.json('$')
-              }
-          IntegrationResponses:
-            - StatusCode: 200
-              ResponseParameters:
-                method.response.header.Access-Control-Allow-Origin: "'*'"
-            - StatusCode: 400
-              SelectionPattern: '.*"statusCode":400.*'
-              ResponseParameters:
-                method.response.header.Access-Control-Allow-Origin: "'*'"
-            - StatusCode: 500
-              SelectionPattern: '.*"statusCode":500.*'
-              ResponseParameters:
-                method.response.header.Access-Control-Allow-Origin: "'*'"
-        MethodResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Origin: true
-          - StatusCode: 400
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Origin: true
-          - StatusCode: 500
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Origin: true
-
-    # OPTIONS method for CORS preflight
-    ApiGatewayOptionsMethod:
-      Type: AWS::ApiGateway::Method
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        ResourceId: !Ref ApiGatewayResourceMessages
-        HttpMethod: OPTIONS
-        AuthorizationType: NONE
-        Integration:
-          Type: MOCK
-          RequestTemplates:
-            application/json: '{"statusCode": 200}'
-          IntegrationResponses:
-            - StatusCode: 200
-              ResponseParameters:
-                method.response.header.Access-Control-Allow-Origin: "'*'"
-                method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
-        MethodResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Origin: true
-              method.response.header.Access-Control-Allow-Methods: true
-              method.response.header.Access-Control-Allow-Headers: true
-
-    # IAM Role for API Gateway to invoke Lambda
-    ApiGatewayRole:
-      Type: AWS::IAM::Role
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service: apigateway.amazonaws.com
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: LambdaInvokePolicy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action: lambda:InvokeFunction
-                  Resource: !Sub arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}
-
-    # API Gateway Deployment
-    ApiGatewayDeployment:
-      Type: AWS::ApiGateway::Deployment
-      DependsOn: [ApiGatewayMethod, ApiGatewayOptionsMethod]
-      Properties:
-        RestApiId: !Ref ApiGatewayRestApi
-        StageName: ${self:custom.stage}
-        Description: !Sub 'Deployment for ${self:custom.stage}'
-
-  Outputs:
-    ApiUrl:
-      Description: URL of the API
-      Value: !Sub https://${ApiGatewayRestApi}.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}
+  addMessage:
+    handler: test.handler
+    events:
+      - http:
+          path: v1/conversations/{conversationId}/messages
+          method: post
+          integration: lambda-proxy
+          request:
+            uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
+            parameters:
+              paths:
+                conversationId: true
