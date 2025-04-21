@@ -104,20 +104,60 @@ resources:
           IntegrationHttpMethod: POST
           Uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
           Credentials: !GetAtt ApiGatewayRole.Arn
+          TimeoutInMillis: 29000
           RequestTemplates:
             application/json: |
               {
                 "conversationId": "$input.params('conversationId')",
                 "body": $input.json('$')
               }
+          IntegrationResponses:
+            - StatusCode: 200
+              ResponseParameters:
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+            - StatusCode: 400
+              SelectionPattern: '.*"statusCode":400.*'
+              ResponseParameters:
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+            - StatusCode: 500
+              SelectionPattern: '.*"statusCode":500.*'
+              ResponseParameters:
+                method.response.header.Access-Control-Allow-Origin: "'*'"
         MethodResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-        IntegrationResponses:
+              method.response.header.Access-Control-Allow-Origin: true
+          - StatusCode: 400
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: true
+          - StatusCode: 500
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: true
+
+    # OPTIONS method for CORS preflight
+    ApiGatewayOptionsMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ResourceId: !Ref ApiGatewayResourceMessages
+        HttpMethod: OPTIONS
+        AuthorizationType: NONE
+        Integration:
+          Type: MOCK
+          RequestTemplates:
+            application/json: '{"statusCode": 200}'
+          IntegrationResponses:
+            - StatusCode: 200
+              ResponseParameters:
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+                method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        MethodResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Origin: true
+              method.response.header.Access-Control-Allow-Methods: true
+              method.response.header.Access-Control-Allow-Headers: true
 
     # IAM Role for API Gateway to invoke Lambda
     ApiGatewayRole:
@@ -142,10 +182,11 @@ resources:
     # API Gateway Deployment
     ApiGatewayDeployment:
       Type: AWS::ApiGateway::Deployment
-      DependsOn: ApiGatewayMethod
+      DependsOn: [ApiGatewayMethod, ApiGatewayOptionsMethod]
       Properties:
         RestApiId: !Ref ApiGatewayRestApi
         StageName: ${self:custom.stage}
+        Description: !Sub "Deployment for ${self:custom.stage} at ${AWS::Pseudo::TIMESTAMP}"
 
   Outputs:
     ApiUrl:
