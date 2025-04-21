@@ -32,22 +32,92 @@ plugins:
   - serverless-offline
   - serverless-esbuild
 
-functions:
-  addMessage:
-      handler: ../src/handlers/test.handler
-      events:
-        - http:
-            path: v1/conversations/{conversationId}/messages
-            method: post
-            integration: aws
-            request:
-              uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
-              parameters:
-                paths:
-                  conversationId: true
+# functions:
+#   addMessage:
+#       handler: ../src/handlers/test.handler
+#       events:
+#         - http:
+#             path: v1/conversations/{conversationId}/messages
+#             method: post
+#             integration: aws
+#             request:
+#               uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
+#               parameters:
+#                 paths:
+#                   conversationId: true
 
 resources:
   Resources:
+    # API Gateway Rest API
+    ApiGatewayRestApi:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ${self:service}-api
+        Description: API Gateway for cross-account Lambda integration
+
+    # Resource for /v1
+    ApiGatewayResourceV1:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+        PathPart: v1
+
+    # Resource for /v1/conversations
+    ApiGatewayResourceConversations:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ParentId: !Ref ApiGatewayResourceV1
+        PathPart: conversations
+
+    # Resource for /v1/conversations/{conversationId}
+    ApiGatewayResourceConversationId:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ParentId: !Ref ApiGatewayResourceConversations
+        PathPart: '{conversationId}'
+
+    # Resource for /v1/conversations/{conversationId}/messages
+    ApiGatewayResourceMessages:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ParentId: !Ref ApiGatewayResourceConversationId
+        PathPart: messages
+
+    # POST method for /v1/conversations/{conversationId}/messages
+    ApiGatewayMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        ResourceId: !Ref ApiGatewayResourceMessages
+        HttpMethod: POST
+        AuthorizationType: NONE
+        RequestParameters:
+          method.request.path.conversationId: true
+        Integration:
+          Type: AWS
+          IntegrationHttpMethod: POST
+          Uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
+          Credentials: !GetAtt ApiGatewayRole.Arn
+          RequestTemplates:
+            application/json: |
+              {
+                "conversationId": "$input.params('conversationId')",
+                "body": $input.json('$')
+              }
+        MethodResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+    # IAM Role for API Gateway to invoke Lambda
     ApiGatewayRole:
       Type: AWS::IAM::Role
       Properties:
@@ -65,9 +135,17 @@ resources:
               Statement:
                 - Effect: Allow
                   Action: lambda:InvokeFunction
-                  Resource: !Sub arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:*
+                  Resource: !Sub arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}
 
-Outputs:
+    # API Gateway Deployment
+    ApiGatewayDeployment:
+      Type: AWS::ApiGateway::Deployment
+      DependsOn: ApiGatewayMethod
+      Properties:
+        RestApiId: !Ref ApiGatewayRestApi
+        StageName: ${self:custom.stage}
+
+  Outputs:
     ApiUrl:
       Description: URL of the API
-      Value: !Sub https://${RestApiId}.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}
+      Value: !Sub https://${ApiGatewayRestApi}.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}
