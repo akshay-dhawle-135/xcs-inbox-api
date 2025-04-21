@@ -7,14 +7,14 @@ custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
   stage: '${opt:stage, "local"}'
   stackName: '${self:service}'
-  # lambdaAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
-  lambdaAccountId: "599272883479"
+  lambdaAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
+  # lambdaAccountId: "599272883479"
   lambdaRegion: ${self:provider.region}
   lambdaFunctionName: addMessage
   # commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:ssm:${self:custom.secretsPrefix}-${opt:stage}"
   customDomain:
-    # domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-    domainName: "akshaydevzone.site"
+    domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+    # domainName: "akshaydevzone.site"
     stage: ${opt:stage, "local"}
     basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox-api"}
     createRoute53Record: false
