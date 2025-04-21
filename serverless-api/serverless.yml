@@ -30,12 +30,14 @@ plugins:
   - serverless-offline
   - serverless-esbuild
 
-package:
-  exclude:
-    - '**/*'
-
-
 functions:
+  healthCheck:
+    handler: ../src/handlers/healthCheck.handler
+    events:
+      - http:
+          method: get
+          path: v1/health-check
+
   addMessage:
     events:
       - http:
