@@ -41,5 +41,6 @@ jobs:
         env:
           ROLE_ARN: ${{ vars.AWS_IAM_ROLE_ARN }}
           SERVICE_NAME_PREFIX: ${{ vars.SERVICE_NAME_PREFIX }}
+          SLS_INTERACTIVE_SETUP_ENABLE: 1 
 
         run: npx serverless --config ${{ inputs.PATH }}.yml deploy --verbose --stage ${{ inputs.STAGE }}
