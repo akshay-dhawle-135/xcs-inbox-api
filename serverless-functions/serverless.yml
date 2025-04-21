@@ -19,9 +19,9 @@ plugins:
 
 functions:
   addMessage:
-    handler: src/handlers/addMessage.handler
+    handler: ../src/handlers/addMessage.handler
 
   addConversation:
-    handler: src/handlers/addConversation.handler
+    handler: ../src/handlers/addConversation.handler
 
 
