@@ -8,7 +8,7 @@ custom:
   stage: '${opt:stage, "local"}'
   stackName: '${self:service}'
   commAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
-  commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:inbox-communication"
+  # commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:ssm:${self:custom.secretsPrefix}-${opt:stage}"
   customDomain:
     domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
     stage: ${opt:stage, "local"}
@@ -38,7 +38,7 @@ functions:
           path: v1/conversations/{conversationId}/messages
           integration: lambda
           request:
-            uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.commLambdaPrefix}-addMessage/invocations
+            uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.secretsPrefix}-${opt:stage}-addMessage/invocations
 
   addConversation:
     events:
@@ -47,4 +47,4 @@ functions:
           path: v1/conversations
           integration: lambda
           request:
-            uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.commLambdaPrefix}-addConversation/invocations
+            uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.secretsPrefix}-${opt:stage}-addConversation/invocations
