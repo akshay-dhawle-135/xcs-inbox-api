@@ -186,7 +186,7 @@ resources:
       Properties:
         RestApiId: !Ref ApiGatewayRestApi
         StageName: ${self:custom.stage}
-        Description: !Sub "Deployment for ${self:custom.stage}"
+        Description: !Sub 'Deployment for ${self:custom.stage}'
 
   Outputs:
     ApiUrl:
