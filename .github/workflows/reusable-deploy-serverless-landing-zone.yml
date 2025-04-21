@@ -9,6 +9,9 @@ on:
       STAGE:
         type: string
         required: true
+      PATH:
+        type: string
+        required: true
 
 permissions:
   id-token: write
