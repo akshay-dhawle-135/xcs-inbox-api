@@ -1,0 +1,27 @@
+service: '${env:SERVICE_NAME_PREFIX, "inbox-functions-local"}'
+frameworkVersion: '3'
+useDotenv: true
+
+custom:
+  secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
+  stage: '${opt:stage, "local"}'
+  stackName: '${self:service}'
+
+provider:
+  name: aws
+  region: ${env:AWS_REGION, "us-east-1"}
+  runtime: nodejs20.x
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-esbuild
+  - serverless-offline  
+
+functions:
+  addMessage:
+    handler: src/handlers/addMessage.handler
+
+  addConversation:
+    handler: src/handlers/addConversation.handler
+
+

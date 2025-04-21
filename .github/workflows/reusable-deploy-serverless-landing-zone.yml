@@ -1,0 +1,42 @@
+name: reusable - Deploy Serverless Package
+
+on:
+  workflow_call:
+    inputs:
+      ENVIRONMENT:
+        type: string
+        required: true
+      STAGE:
+        type: string
+        required: true
+
+permissions:
+  id-token: write
+  contents: write
+jobs:
+  deploy:
+    name: Deploy Serverless
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.ENVIRONMENT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{vars.AWS_IAM_ROLE_ARN}}
+          role-session-name: serverless-deployment-${{inputs.STAGE}}-session
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install Serverless Framework and plugins
+        run: npm ci
+
+      - name: Serverless Deploy
+        env:
+          ROLE_ARN: ${{ vars.AWS_IAM_ROLE_ARN }}
+          SERVICE_NAME_PREFIX: ${{ vars.SERVICE_NAME_PREFIX }}
+
+        run: npx serverless --config ${{ inputs.PATH }}/serverless.yml deploy --verbose --stage ${{ inputs.STAGE }}

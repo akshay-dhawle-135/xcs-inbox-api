@@ -1,0 +1,47 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint", "prettier", "import"],
+  "extends": [ "airbnb-typescript/base", "plugin:import/recommended", "plugin:prettier/recommended"],
+  "ignorePatterns": ["documentation_portal"],
+  "rules": {
+      "@typescript-eslint/no-explicit-any": 1,
+      "import/extensions": [
+          "error",
+          "ignorePackages",
+          {
+            "js": "never",
+            "jsx": "never",
+            "ts": "never",
+            "tsx": "never",
+            "": "never"
+          }
+       ],
+       "import/no-extraneous-dependencies": [
+          "error", 
+          { "devDependencies": true }
+        ],
+      "@typescript-eslint/naming-convention": "off" 
+  },
+  "settings": {
+      "import/resolver": {
+        "node": {
+          "extensions": [".js", ".jsx", ".ts", ".tsx"]
+        }
+      }
+    },
+  "env": {
+    "node": true
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.spec.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ]
+}

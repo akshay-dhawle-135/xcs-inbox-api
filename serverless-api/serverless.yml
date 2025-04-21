@@ -1,0 +1,53 @@
+service: '${env:SERVICE_NAME_PREFIX, "inbox-api-local"}'
+frameworkVersion: '3'
+
+useDotenv: true
+
+custom:
+  secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
+  stage: '${opt:stage, "local"}'
+  stackName: '${self:service}'
+  commAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
+  commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:inbox-communication"
+  customDomain:
+    domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+    stage: ${opt:stage, "local"}
+    basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox-api"}
+    createRoute53Record: false
+    createRoute53IPv6Record: false
+    apiType: rest
+    autoDomain: false
+    endpointType: edge
+
+provider:
+  name: aws
+  region: ${env:AWS_REGION, "us-east-1"}
+  runtime: nodejs20.x
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-domain-manager
+  - serverless-offline
+  - serverless-esbuild
+
+functions:
+  addMessage:
+    handler: placeholder.handler
+    events:
+      - http:
+          method: post
+          path: v1/conversations/{conversationId}/messages
+          integration: lambda
+          request:
+            uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.commLambdaPrefix}-addMessage/invocations
+
+  addConversation:
+    handler: placeholder.handler
+    events:
+      - http:
+          method: post
+          path: v1/conversations
+          integration: lambda
+          request:
+            uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.commLambdaPrefix}-addConversation/invocations
+
