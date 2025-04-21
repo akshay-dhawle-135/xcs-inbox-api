@@ -32,7 +32,6 @@ plugins:
 
 functions:
   addMessage:
-    handler: placeholder.handler
     events:
       - http:
           method: post
@@ -42,7 +41,6 @@ functions:
             uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.commLambdaPrefix}-addMessage/invocations
 
   addConversation:
-    handler: placeholder.handler
     events:
       - http:
           method: post
@@ -50,4 +48,3 @@ functions:
           integration: lambda
           request:
             uri: arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions:${self:custom.commLambdaPrefix}-addConversation/invocations
-
