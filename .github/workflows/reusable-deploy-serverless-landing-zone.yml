@@ -42,4 +42,4 @@ jobs:
           ROLE_ARN: ${{ vars.AWS_IAM_ROLE_ARN }}
           SERVICE_NAME_PREFIX: ${{ vars.SERVICE_NAME_PREFIX }}
 
-        run: npx serverless --config ${{ inputs.PATH }}/serverless.yml deploy --verbose --stage ${{ inputs.STAGE }}
+        run: npx serverless --config ${{ inputs.PATH }}.yml deploy --verbose --stage ${{ inputs.STAGE }}
