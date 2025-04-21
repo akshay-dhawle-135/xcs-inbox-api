@@ -30,6 +30,11 @@ plugins:
   - serverless-offline
   - serverless-esbuild
 
+package:
+  exclude:
+    - '**/*'
+
+
 functions:
   addMessage:
     events:
