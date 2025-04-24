@@ -1,27 +1,26 @@
-# name: deploy - Deploy Serverless service to AWS Landing Zone
+name: deploy - Deploy Serverless service to AWS Landing Zone
 
-# on:
-#   push:
-#     branches:
-#       - main
-#   workflow_dispatch:
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-# # permission can be added at job level or workflow level
-# permissions:
-#   id-token: write # Required to get the ID Token that will be used for OIDC
-#   contents: write # Required for actions/checkout
+# permission can be added at job level or workflow level
+permissions:
+  id-token: write # Required to get the ID Token that will be used for OIDC
+  contents: write # Required for actions/checkout
 
-# jobs:
-#   deploy-dev:
-#     name: Deploy-dev-sls-lz
-#     concurrency:
-#       group: ${{github.repository}}-deploy-dev
-#     uses: ./.github/workflows/reusable-deploy-serverless-landing-zone.yml
-#     secrets: inherit
-#     permissions:
-#       id-token: write
-#       contents: write
-#     with:
-#       ENVIRONMENT: ecom-communication-technology-dev-usea1-env
-#       STAGE: dev
-#       PATH: serverless-functions
+jobs:
+  deploy-dev:
+    name: Deploy-dev-sls-lz
+    concurrency:
+      group: ${{github.repository}}-deploy-dev
+    uses: ./.github/workflows/reusable-deploy-serverless-landing-zone.yml
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: write
+    with:
+      ENVIRONMENT: ecom-communication-technology-dev-usea1-env
+      STAGE: dev

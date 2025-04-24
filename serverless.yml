@@ -7,21 +7,20 @@ custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
   stage: '${opt:stage, "local"}'
   stackName: '${self:service}'
-  lambdaAccountId: ${env:COMMUNICATION_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/COMMUNICATION_ACCOUNT_ID}
   # lambdaAccountId: "599272883479"
-  lambdaRegion: ${self:provider.region}
-  lambdaFunctionName: addMessage
+  # lambdaRegion: ${self:provider.region}
+  # lambdaFunctionName: addMessage
   # commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:ssm:${self:custom.secretsPrefix}-${opt:stage}"
   customDomain:
-    domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+    # domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
     # domainName: "akshaydevzone.site"
+    # basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox-api"}
     stage: ${opt:stage, "local"}
-    basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox-api"}
     createRoute53Record: false
     createRoute53IPv6Record: false
     apiType: rest
     autoDomain: false
-    endpointType: edge
+    endpointType: private
 
 provider:
   name: aws
@@ -34,21 +33,14 @@ plugins:
   - serverless-offline
   - serverless-esbuild
 
-package:
-  individually: true
-  exclude: 
-    - ./*  
-
 functions:
   addMessage:
-    handler: test.handler
+    handler: src/handlers/addMessage.handler
     events:
       - http:
           path: v1/conversations/{conversationId}/messages
           method: post
-          integration: lambda-proxy
-          request:
-            uri: !Sub arn:aws:apigateway:${self:provider.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${self:custom.lambdaRegion}:${self:custom.lambdaAccountId}:function:${self:custom.lambdaFunctionName}/invocations
-            parameters:
-              paths:
-                conversationId: true
+
+
+
+

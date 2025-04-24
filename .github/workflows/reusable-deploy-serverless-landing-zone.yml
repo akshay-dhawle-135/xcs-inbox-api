@@ -9,9 +9,6 @@ on:
       STAGE:
         type: string
         required: true
-      PATH:
-        type: string
-        required: true
 
 permissions:
   id-token: write
@@ -42,4 +39,4 @@ jobs:
           ROLE_ARN: ${{ vars.AWS_IAM_ROLE_ARN }}
           SERVICE_NAME_PREFIX: ${{ vars.SERVICE_NAME_PREFIX }}
 
-        run: cd ${{ inputs.PATH }} && npx serverless deploy --verbose --stage ${{ inputs.STAGE }}
+        run: npx serverless deploy --verbose --stage ${{ inputs.STAGE }}
