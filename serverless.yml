@@ -11,21 +11,22 @@ custom:
   # lambdaRegion: ${self:provider.region}
   # lambdaFunctionName: addMessage
   # commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:ssm:${self:custom.secretsPrefix}-${opt:stage}"
-  customDomain:
-    # domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-    # domainName: "akshaydevzone.site"
-    # basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox-api"}
-    stage: ${opt:stage, "local"}
-    createRoute53Record: false
-    createRoute53IPv6Record: false
-    apiType: rest
-    autoDomain: false
-    endpointType: private
+  # customDomain:
+  #   # domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+  #   # domainName: "akshaydevzone.site"
+  #   # basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox-api"}
+  #   stage: ${opt:stage, "local"}
+  #   createRoute53Record: false
+  #   createRoute53IPv6Record: false
+  #   apiType: rest
+  #   autoDomain: false
+    # endpointType: private
 
 provider:
   name: aws
   region: ${env:AWS_REGION, "us-east-1"}
   runtime: nodejs20.x
+  endpointType: PRIVATE
 
 plugins:
   - serverless-dotenv-plugin
