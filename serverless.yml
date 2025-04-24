@@ -27,10 +27,16 @@ provider:
   region: ${env:AWS_REGION, "us-east-1"}
   runtime: nodejs20.x
   endpointType: PRIVATE
+  apiGateway:
+    resourcePolicy:
+      - Effect: Allow
+        Principal: "*"
+        Action: execute-api:Invoke
+        Resource: "*"  
 
 plugins:
   - serverless-dotenv-plugin
-  - serverless-domain-manager
+  # - serverless-domain-manager
   - serverless-offline
   - serverless-esbuild
 
