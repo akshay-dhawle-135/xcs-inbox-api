@@ -39,4 +39,5 @@ jobs:
           ROLE_ARN: ${{ vars.AWS_IAM_ROLE_ARN }}
           SERVICE_NAME_PREFIX: ${{ vars.SERVICE_NAME_PREFIX }}
 
-        run: npx serverless deploy --verbose --stage ${{ inputs.STAGE }}
+        run: npx serverless remove --verbose --stage ${{ inputs.STAGE }}
+        # run: npx serverless deploy --verbose --stage ${{ inputs.STAGE }}
