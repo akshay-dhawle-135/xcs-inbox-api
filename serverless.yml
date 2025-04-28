@@ -33,6 +33,13 @@ provider:
         Principal: "*"
         Action: execute-api:Invoke
         Resource: "*"  
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - apigateway:UpdateRestApiPolicy
+          Resource: "*"        
 
 plugins:
   - serverless-dotenv-plugin
