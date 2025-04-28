@@ -7,6 +7,7 @@ custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
   stage: '${opt:stage, "local"}'
   stackName: '${self:service}'
+  awsAccountId: ${env:SHARED_AWS_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/SHARED_AWS_ACCOUNT_ID}
   # lambdaAccountId: "599272883479"
   # lambdaRegion: ${self:provider.region}
   # lambdaFunctionName: addMessage
@@ -32,7 +33,7 @@ provider:
       - Effect: Allow
         Principal: 
           AWS:
-            - "arn:aws:iam::501921308880:root"  # Shared Account ID
+            - "arn:aws:iam::${self:custom.awsAccountId}:root"  # Shared Account ID
         Action: execute-api:Invoke
         Resource: execute-api:/*
 
