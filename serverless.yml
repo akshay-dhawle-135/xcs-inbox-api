@@ -35,7 +35,8 @@ provider:
           AWS:
             - "arn:aws:iam::${self:custom.awsAccountId}:root"  # Shared Account ID
         Action: execute-api:Invoke
-        Resource: execute-api:/*
+        # Resource: execute-api:/*
+        Resource: "*"
 
 plugins:
   - serverless-dotenv-plugin
