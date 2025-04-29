@@ -31,6 +31,7 @@ provider:
   apiGateway:
     resourcePolicy: ${env:API_GATEWAY_RESOURCE_POLICY, ssm:${self:custom.secretsPrefix}/API_GATEWAY_RESOURCE_POLICY}
 
+
 plugins:
   - serverless-dotenv-plugin
   # - serverless-domain-manager
