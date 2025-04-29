@@ -27,9 +27,13 @@ provider:
   name: aws
   region: ${env:AWS_REGION, "us-east-1"}
   runtime: nodejs20.x
-  endpointType: PRIVATE
-  apiGateway:
-    resourcePolicy: ${env:API_GATEWAY_RESOURCE_POLICY, ssm:${self:custom.secretsPrefix}/API_GATEWAY_RESOURCE_POLICY}
+  endpointType: PRIVATE 
+
+iam:
+  role:
+    name: ${self:service}-exec-role
+    managedPolicies: ${env:EXECUTION_ROLE_SUPPLEMENTAL_POLICY_ARN, ssm:${self:custom.secretsPrefix}/EXECUTION_ROLE_SUPPLEMENTAL_POLICY_ARN, null}  
+
 
 plugins:
   - serverless-dotenv-plugin
