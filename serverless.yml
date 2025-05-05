@@ -1,57 +1,47 @@
 service: '${env:SERVICE_NAME_PREFIX, "inbox-api-local"}'
 frameworkVersion: '3'
-
 useDotenv: true
 
 custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
-  stage: '${opt:stage, "local"}'
+  stage: '${opt:stage, self:provider.stage, "local"}'
   stackName: '${self:service}'
-  awsAccountId: ${env:SHARED_AWS_ACCOUNT_ID, ssm:${self:custom.secretsPrefix}/SHARED_AWS_ACCOUNT_ID}
-  # lambdaAccountId: "599272883479"
-  # lambdaRegion: ${self:provider.region}
-  # lambdaFunctionName: addMessage
-  # commLambdaPrefix: "arn:aws:lambda:${self:provider.region}:${self:custom.commAccountId}:function:ssm:${self:custom.secretsPrefix}-${opt:stage}"
-  # customDomain:
-  #   # domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-  #   # domainName: "akshaydevzone.site"
-  #   # basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox-api"}
-  #   stage: ${opt:stage, "local"}
-  #   createRoute53Record: false
-  #   createRoute53IPv6Record: false
-  #   apiType: rest
-  #   autoDomain: false
-    # endpointType: private
 
 provider:
   name: aws
   region: ${env:AWS_REGION, "us-east-1"}
   runtime: nodejs20.x
-  endpointType: PRIVATE 
+  endpointType: PRIVATE
   apiGateway:
-    resourcePolicy: ${env:API_GATEWAY_RESOURCE_POLICY, ssm:${self:custom.secretsPrefix}/API_GATEWAY_RESOURCE_POLICY}
-
-
-plugins:
-  - serverless-dotenv-plugin
-  # - serverless-domain-manager
-  - serverless-offline
-  - serverless-esbuild
+    resourcePolicy:
+      - Effect: Allow
+        Principal: "*"
+        Action: execute-api:Invoke
+        Resource: execute-api:/*
 
 functions:
+  healthCheck:
+    handler: src/handlers/healthCheck.handler
+    events:
+      - http:
+          method: get
+          path: v1/health-check
+
   addMessage:
     handler: src/handlers/addMessage.handler
     events:
       - http:
-          path: v1/conversations/{conversationId}/messages
           method: post
-  getMessages:
-    handler: src/handlers/addMessage.handler
+          path: v1/conversations/{conversationId}/messages
+
+  addConversation:
+    handler: src/handlers/addConversation.handler
     events:
       - http:
-          path: v1/conversations/{conversationId}/messages
-          method: get
+          method: post
+          path: v1/conversations
 
-
-
-
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+  - serverless-esbuild
