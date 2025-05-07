@@ -52,5 +52,6 @@ functions:
 
 plugins:
   - serverless-dotenv-plugin
+  - serverless-domain-manager  
   - serverless-offline
   - serverless-esbuild
