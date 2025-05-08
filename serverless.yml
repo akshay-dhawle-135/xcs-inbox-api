@@ -6,15 +6,15 @@ custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
   stage: '${opt:stage, self:provider.stage, "local"}'
   stackName: '${self:service}'
-  # customDomain: 
-  #   domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-  #   stage: ${opt:stage, "local"}
-  #   basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
-  #   createRoute53Record: false
-  #   createRoute53IPv6Record: false
-  #   apiType: rest
-  #   autoDomain: false
-  #   endpointType: REGIONAL
+  customDomain: 
+    domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+    stage: ${opt:stage, "local"}
+    basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+    createRoute53Record: false
+    createRoute53IPv6Record: false
+    apiType: rest
+    autoDomain: false
+    endpointType: REGIONAL
 
 provider:
   name: aws
@@ -52,6 +52,6 @@ functions:
 
 plugins:
   - serverless-dotenv-plugin
-  # - serverless-domain-manager  
+  - serverless-domain-manager  
   - serverless-offline
   - serverless-esbuild
