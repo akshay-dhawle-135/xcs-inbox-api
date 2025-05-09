@@ -16,7 +16,7 @@ custom:
     autoDomain: false
     endpointType: REGIONAL
   datadog:
-    site: datadoghq.com
+    site: us5.datadoghq.com
     apiKey: '${env:DD_API_KEY, ssm:${self:custom.secretsPrefix}/DD_API_KEY}'
     appKey: '${env:DD_APP_KEY, ssm:${self:custom.secretsPrefix}/DD_APP_KEY}'
     forwarderArn: '${env:DD_FORWARDER_ARN, ssm:${self:custom.secretsPrefix}/DD_FORWARDER_ARN}'
