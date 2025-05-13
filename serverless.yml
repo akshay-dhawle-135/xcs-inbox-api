@@ -21,7 +21,6 @@ custom:
     appKey: '${env:DD_APP_KEY, ssm:${self:custom.secretsPrefix}/DD_APP_KEY}'
     forwarderArn: '${env:DD_FORWARDER_ARN, ssm:${self:custom.secretsPrefix}/DD_FORWARDER_ARN}'
 
-
 provider:
   name: aws
   region: ${env:AWS_REGION, "us-east-1"}
@@ -55,6 +54,28 @@ functions:
       - http:
           method: post
           path: v1/conversations
+
+  addParticipants:
+    handler: src/handlers/addParticipants.handler
+    events:
+      - http:
+          method: post
+          path: v1/conversations/{conversationId}/participants
+
+  getConversations:
+    handler: src/handlers/getConversations.handler
+    events:
+      - http:
+          method: get
+          path: v1/conversations
+
+  getConversationMessages:
+    handler: src/handlers/getConversationMessages.handler
+    events:
+      - http:
+          method: get
+          path: v1/conversations/{conversationId}/messages
+
 
 plugins:
   - serverless-dotenv-plugin
