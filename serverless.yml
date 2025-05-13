@@ -15,11 +15,11 @@ custom:
     apiType: rest
     autoDomain: false
     endpointType: REGIONAL
-  datadog:
-    site: us5.datadoghq.com
-    apiKey: '${env:DD_API_KEY, ssm:${self:custom.secretsPrefix}/DD_API_KEY}'
-    appKey: '${env:DD_APP_KEY, ssm:${self:custom.secretsPrefix}/DD_APP_KEY}'
-    forwarderArn: '${env:DD_FORWARDER_ARN, ssm:${self:custom.secretsPrefix}/DD_FORWARDER_ARN}'
+  # datadog:
+  #   site: us5.datadoghq.com
+  #   apiKey: '${env:DD_API_KEY, ssm:${self:custom.secretsPrefix}/DD_API_KEY}'
+  #   appKey: '${env:DD_APP_KEY, ssm:${self:custom.secretsPrefix}/DD_APP_KEY}'
+  #   forwarderArn: '${env:DD_FORWARDER_ARN, ssm:${self:custom.secretsPrefix}/DD_FORWARDER_ARN}'
 
 provider:
   name: aws
@@ -79,7 +79,7 @@ functions:
 
 plugins:
   - serverless-dotenv-plugin
-  - serverless-plugin-datadog
+  # - serverless-plugin-datadog
   - serverless-domain-manager  
   - serverless-offline
   - serverless-esbuild
