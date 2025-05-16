@@ -22,5 +22,5 @@ jobs:
       id-token: write
       contents: write
     with:
-      ENVIRONMENT: ecom-shared-technology-dev-usea1-env
+      ENVIRONMENT: ecom-communication-technology-dev-usea1-env
       STAGE: dev

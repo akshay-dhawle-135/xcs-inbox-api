@@ -14,7 +14,7 @@ custom:
     createRoute53IPv6Record: false
     apiType: rest
     autoDomain: false
-    endpointType: REGIONAL
+    # endpointType: REGIONAL
   # datadog:
   #   site: us5.datadoghq.com
   #   apiKey: '${env:DD_API_KEY, ssm:${self:custom.secretsPrefix}/DD_API_KEY}'
