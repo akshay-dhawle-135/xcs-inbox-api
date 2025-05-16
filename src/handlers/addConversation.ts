@@ -16,6 +16,7 @@ const addConversation = async (
   event: InboxAPIGatewayEvent<IBody>,
 ): Promise<APIGatewayProxyResult> => {
   logger.info('addConversation event received:', event);
+  logger.info('addConversation event received:', event);
   return buildApiResponse(201, { message: 'Conversation added successfully!' });
 };
 
