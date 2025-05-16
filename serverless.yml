@@ -6,14 +6,14 @@ custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
   stage: '${opt:stage, self:provider.stage, "local"}'
   stackName: '${self:service}'
-  customDomain: 
-    domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-    stage: ${opt:stage, "local"}
-    basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
-    createRoute53Record: false
-    createRoute53IPv6Record: false
-    apiType: rest
-    autoDomain: false
+  # customDomain: 
+  #   domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+  #   stage: ${opt:stage, "local"}
+  #   basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+  #   createRoute53Record: false
+  #   createRoute53IPv6Record: false
+  #   apiType: rest
+  #   autoDomain: false
     # endpointType: REGIONAL
   # datadog:
   #   site: us5.datadoghq.com
@@ -76,10 +76,21 @@ functions:
           method: get
           path: v1/conversations/{conversationId}/messages
 
+resources:
+  Resources:
+    # Base Path Mapping
+    BasePathMapping:
+      Type: AWS::ApiGateway::BasePathMapping
+      Properties:
+        DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+        BasePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+        RestApiId: !Ref ApiGatewayRestApi # References the auto-created API Gateway
+        Stage: ${opt:stage, "local"}
+
 
 plugins:
   - serverless-dotenv-plugin
   # - serverless-plugin-datadog
-  - serverless-domain-manager  
+  # - serverless-domain-manager  
   - serverless-offline
   - serverless-esbuild
