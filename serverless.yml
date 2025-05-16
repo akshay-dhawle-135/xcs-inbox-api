@@ -82,10 +82,10 @@ resources:
     BasePathMapping:
       Type: AWS::ApiGateway::BasePathMapping
       Properties:
-        DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-        BasePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+        DomainName: api.qubly.site
+        BasePath: inbox
         RestApiId: !Ref ApiGatewayRestApi # References the auto-created API Gateway
-        Stage: ${opt:stage, "local"}
+        Stage: dev
 
 
 plugins:
