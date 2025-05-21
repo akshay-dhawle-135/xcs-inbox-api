@@ -77,16 +77,16 @@ functions:
           method: get
           path: v1/conversations/{conversationId}/messages
 
-# resources:
-#   Resources:
-#     ApiGatewayBasePathMapping:
-#       Type: AWS::ApiGateway::BasePathMapping
-#       Properties:
-#         DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-#         RestApiId:
-#           Ref: ApiGatewayRestApi
-#         Stage: ${self:custom.stage}
-#         BasePath: ${ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+resources:
+  Resources:
+    ApiGatewayBasePathMapping:
+      Type: AWS::ApiGateway::BasePathMapping
+      Properties:
+        DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        Stage: ${self:custom.stage}
+        BasePath: ${ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
 
 plugins:
   - serverless-dotenv-plugin
