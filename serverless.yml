@@ -87,6 +87,7 @@ resources:
           Ref: ApiGatewayRestApi
         Stage: ${self:custom.stage}
         BasePath: ${ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+        DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN_NAME_ID, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_NAME_ID}
 
 plugins:
   - serverless-dotenv-plugin
