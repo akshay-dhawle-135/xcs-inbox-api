@@ -82,12 +82,11 @@ resources:
     ApiGatewayBasePathMapping:
       Type: AWS::ApiGateway::BasePathMapping
       Properties:
-        DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+        DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN_NAME_ID, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_NAME_ID}
         RestApiId:
           Ref: ApiGatewayRestApi
         Stage: ${self:custom.stage}
         BasePath: ${ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
-        DomainNameId: ${env:API_GATEWAY_CUSTOM_DOMAIN_NAME_ID, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_NAME_ID}
 
 plugins:
   - serverless-dotenv-plugin
