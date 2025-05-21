@@ -6,15 +6,15 @@ custom:
   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
   stage: '${opt:stage, self:provider.stage, "local"}'
   stackName: '${self:service}'
-  # customDomain: 
-  #   domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-  #   stage: ${opt:stage, "local"}
-  #   basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
-  #   createRoute53Record: false
-  #   createRoute53IPv6Record: false
-  #   apiType: rest
-  #   autoDomain: false
-  #   endpointType: REGIONAL
+  customDomain: 
+    domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+    stage: ${opt:stage, "local"}
+    basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+    createRoute53Record: false
+    createRoute53IPv6Record: false
+    apiType: rest
+    autoDomain: false
+    endpointType: REGIONAL
   #   domainNameId: ${env:API_GATEWAY_CUSTOM_DOMAIN_NAME_ID, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_NAME_ID}
   # datadog:
   #   site: us5.datadoghq.com
@@ -77,20 +77,20 @@ functions:
           method: get
           path: v1/conversations/{conversationId}/messages
 
-resources:
-  Resources:
-    ApiGatewayBasePathMapping:
-      Type: AWS::ApiGateway::BasePathMapping
-      Properties:
-        DomainName: arn:aws:apigateway:us-east-1:599272883479:/domainnames/api.qubly.site+43e830zcjb
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        Stage: ${self:custom.stage}
-        BasePath: ${ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+# resources:
+#   Resources:
+#     ApiGatewayBasePathMapping:
+#       Type: AWS::ApiGateway::BasePathMapping
+#       Properties:
+#         DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+#         RestApiId:
+#           Ref: ApiGatewayRestApi
+#         Stage: ${self:custom.stage}
+#         BasePath: ${ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
 
 plugins:
   - serverless-dotenv-plugin
   # - serverless-plugin-datadog
-  # - serverless-domain-manager  
+  - serverless-domain-manager  
   - serverless-offline
   - serverless-esbuild
