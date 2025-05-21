@@ -82,11 +82,11 @@ resources:
     ApiGatewayBasePathMapping:
       Type: AWS::ApiGateway::BasePathMapping
       Properties:
-        DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
+        DomainName: api.qubly.site
         RestApiId:
           Ref: ApiGatewayRestApi
         Stage: dev
-        BasePath: ${ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+        BasePath: "inbox"
 
 plugins:
   - serverless-dotenv-plugin
