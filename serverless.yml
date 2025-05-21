@@ -85,7 +85,7 @@ resources:
         DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
         RestApiId:
           Ref: ApiGatewayRestApi
-        Stage: ${self:custom.stage}
+        Stage: dev
         BasePath: ${ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
 
 plugins:
