@@ -91,6 +91,6 @@ resources:
 plugins:
   - serverless-dotenv-plugin
   # - serverless-plugin-datadog
-  - serverless-domain-manager  
+  # - serverless-domain-manager  
   - serverless-offline
   - serverless-esbuild
