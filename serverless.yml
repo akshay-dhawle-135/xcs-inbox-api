@@ -15,7 +15,7 @@ custom:
     apiType: rest
     autoDomain: false
     endpointType: REGIONAL
-  #   domainNameId: ${env:API_GATEWAY_CUSTOM_DOMAIN_NAME_ID, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_NAME_ID}
+    domainNameId: ${env:API_GATEWAY_CUSTOM_DOMAIN_NAME_ID, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_NAME_ID}
   # datadog:
   #   site: us5.datadoghq.com
   #   apiKey: '${env:DD_API_KEY, ssm:${self:custom.secretsPrefix}/DD_API_KEY}'
