@@ -82,7 +82,7 @@ resources:
     ApiGatewayBasePathMapping:
       Type: AWS::ApiGateway::BasePathMapping
       Properties:
-        DomainName: ${env:API_GATEWAY_CUSTOM_DOMAIN_NAME_ID, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_NAME_ID}
+        DomainName: 43e830zcjb
         RestApiId:
           Ref: ApiGatewayRestApi
         Stage: ${self:custom.stage}
