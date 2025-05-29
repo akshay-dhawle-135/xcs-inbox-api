@@ -2,35 +2,37 @@ service: '${env:SERVICE_NAME_PREFIX, "inbox-api-local"}'
 frameworkVersion: '3'
 useDotenv: true
 
-# custom:
-#   secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
-#   stage: '${opt:stage, self:provider.stage, "local"}'
-#   stackName: '${self:service}'
-#   customDomain: 
-#     domainName: ${env:API_GATEWAY_CUSTOM_DOMAIN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN}
-#     stage: ${opt:stage, "local"}
-#     basePath: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
-#     createRoute53Record: false
-#     createRoute53IPv6Record: false
-#     apiType: rest
-#     autoDomain: false
-#     endpointType: REGIONAL
-#     domainNameId: ${env:API_GATEWAY_CUSTOM_DOMAIN_NAME_ID, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_NAME_ID}
-  # datadog:
-  #   site: us5.datadoghq.com
-  #   apiKey: '${env:DD_API_KEY, ssm:${self:custom.secretsPrefix}/DD_API_KEY}'
-  #   appKey: '${env:DD_APP_KEY, ssm:${self:custom.secretsPrefix}/DD_APP_KEY}'
-  #   forwarderArn: '${env:DD_FORWARDER_ARN, ssm:${self:custom.secretsPrefix}/DD_FORWARDER_ARN}'
+custom:
+  secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
+  stage: '${opt:stage, self:provider.stage, "local"}'
+  stackName: '${self:service}'
+  # customDomain:
+  #   domainName: csgfic64w5
+  #   stage: dev
+  #   basePath: "inbox"
+  #   createRoute53Record: false
+  #   createRoute53IPv6Record: false
+  #   apiType: rest
+  #   autoDomain: false
+  #   endpointType: REGIONAL
+# datadog:
+#   site: us5.datadoghq.com
+#   apiKey: '${env:DD_API_KEY, ssm:${self:custom.secretsPrefix}/DD_API_KEY}'
+#   appKey: '${env:DD_APP_KEY, ssm:${self:custom.secretsPrefix}/DD_APP_KEY}'
+#   forwarderArn: '${env:DD_FORWARDER_ARN, ssm:${self:custom.secretsPrefix}/DD_FORWARDER_ARN}'
 
 provider:
   name: aws
   region: ${env:AWS_REGION, "us-east-1"}
   runtime: nodejs20.x
   endpointType: PRIVATE
+  environment:
+    XPLOR_GROWTH_EVENT_BUS_NAME: arn:aws:events:us-east-1:501921308880:event-bus/xcs-dev-usea1-common-eventbridge-xplor-growth-event-bus  
+
   apiGateway:
     resourcePolicy:
       - Effect: Allow
-        Principal: "*"
+        Principal: '*'
         Action: execute-api:Invoke
         Resource: execute-api:/*
 
@@ -63,34 +65,37 @@ functions:
           method: post
           path: v1/conversations/{conversationId}/participants
 
-  getConversations:
-    handler: src/handlers/getConversations.handler
-    events:
-      - http:
-          method: get
-          path: v1/conversations
-
-  getConversationMessages:
-    handler: src/handlers/getConversationMessages.handler
-    events:
-      - http:
-          method: get
-          path: v1/conversations/{conversationId}/messages
 
 resources:
   Resources:
-    ApiGatewayBasePathMapping:
-      Type: AWS::ApiGateway::BasePathMapping
+    # Explicit deployment
+    ApiGatewayDeployment:
+      Type: AWS::ApiGateway::Deployment
+      # ApiGatewayMethod + base + (path params + var) + method type
+      DependsOn:
+        - ApiGatewayMethodV1HealthDashcheckGet
+        - ApiGatewayMethodV1ConversationsConversationidVarMessagesPost
+        - ApiGatewayMethodV1ConversationsPost
+        - ApiGatewayMethodV1ConversationsConversationidVarParticipantsPost
       Properties:
-        DomainName: api.qubly.site
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        StageName: dev  
+
+    ApiGatewayBasePathMapping:
+      Type: AWS::ApiGateway::BasePathMappingV2
+      DependsOn: 
+        - ApiGatewayDeployment
+      Properties:
         RestApiId:
           Ref: ApiGatewayRestApi
         Stage: dev
-        BasePath: "inbox"
+        BasePath: 'inbox'
+        DomainNameArn: arn:aws:apigateway:us-east-1:599272883479:/domainnames/api.qubly.site+csgfic64w5
 
 plugins:
   - serverless-dotenv-plugin
   # - serverless-plugin-datadog
-  # - serverless-domain-manager  
+  # - serverless-domain-manager
   - serverless-offline
   - serverless-esbuild
