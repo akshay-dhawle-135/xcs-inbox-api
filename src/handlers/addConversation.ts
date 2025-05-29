@@ -28,6 +28,5 @@ const addConversation = async (
 };
 
 const handler = middy(addConversation)
-  .use(httpJsonBodyParser())
 
 export { handler };
