@@ -29,6 +29,11 @@ provider:
   environment:
     XPLOR_GROWTH_EVENT_BUS_NAME: arn:aws:events:us-east-1:501921308880:event-bus/xcs-dev-usea1-common-eventbridge-xplor-growth-event-bus  
 
+  iam:
+    role:
+      name: ${self:service}-exec-role
+      managedPolicies: ${env:EXECUTION_ROLE_SUPPLEMENTAL_POLICY_ARN, ssm:${self:custom.secretsPrefix}/EXECUTION_ROLE_SUPPLEMENTAL_POLICY_ARN, null}
+
   apiGateway:
     resourcePolicy:
       - Effect: Allow
