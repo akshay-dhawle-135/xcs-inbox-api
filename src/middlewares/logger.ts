@@ -2,7 +2,7 @@ import { createLogger, closeLogger } from '../utils/logger';
 
 const withLogger = () => ({
   before: async () => {
-    createLogger();
+    await createLogger();
   },
   after: async () => {
     await closeLogger();

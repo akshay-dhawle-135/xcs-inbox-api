@@ -1,7 +1,8 @@
-export interface PaginationParams<T> {
+export interface PaginationMetaParams<T> {
   page?: number;
   limit?: number;
   data: T[];
+  total: number;
 }
 
 export interface PaginationMetadata<T> {

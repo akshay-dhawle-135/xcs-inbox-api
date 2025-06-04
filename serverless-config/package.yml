@@ -1,0 +1,4 @@
+# Exclude postgres folder from serverless deploy
+patterns:
+  - '!docker-compose'
+  - '!website'

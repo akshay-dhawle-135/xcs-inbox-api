@@ -1,0 +1,66 @@
+healthCheck:
+  handler: src/handlers/healthCheck.handler
+  events:
+    - http:
+        method: get
+        path: v1/health-check
+
+addMessage:
+  handler: src/handlers/addMessage.handler
+  events:
+    - http:
+        method: post
+        path: v1/conversations/{conversationId}/messages
+
+addConversation:
+  handler: src/handlers/addConversation.handler
+  events:
+    - http:
+        method: post
+        path: v1/conversations
+
+addParticipants:
+  handler: src/handlers/addParticipants.handler
+  events:
+    - http:
+        method: post
+        path: v1/conversations/{conversationId}/participants
+
+getConversations:
+  handler: src/handlers/getConversations.handler
+  events:
+    - http:
+        method: get
+        path: v1/conversations
+
+getConversation:
+  handler: src/handlers/getConversation.handler
+  events:
+    - http:
+        method: get
+        path: v1/conversations/{conversationId}
+
+getConversationMessages:
+  handler: src/handlers/getConversationMessages.handler
+  events:
+    - http:
+        method: get
+        path: v1/conversations/{conversationId}/messages
+
+# addReceivedMessage:
+#   handler: src/handlers/addReceivedMessage.handler
+#   events:
+#     - sqs:
+#         arn: ${env:RECEIVED_MESSAGE_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/RECEIVED_MESSAGE_SQS_QUEUE_ARN}
+
+# addSentMessage:
+#   handler: src/handlers/addSentMessage.handler
+#   events:
+#     - sqs:
+#         arn: ${env:SENT_MESSAGE_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/SENT_MESSAGE_SQS_QUEUE_ARN}
+
+# updateMessageStatus:
+#   handler: src/handlers/updateMessageStatus.handler
+#   events:
+#     - sqs:
+#         arn: ${env:MESSAGE_STATUS_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/MESSAGE_STATUS_SQS_QUEUE_ARN}

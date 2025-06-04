@@ -1,32 +1,38 @@
-import middy from '@middy/core';
-import httpJsonBodyParser from '@middy/http-json-body-parser';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import { z } from 'zod';
-import { publishEvent } from '../aws/eventbridge';
+import { ApiStatus } from '../constants/enums';
+import HTTP_STATUS from '../constants/httpStatusCodes';
+import { Conversation } from '../database/entities/Conversation';
+import { ApiResponseDTO } from '../dtos/common/apiResponse';
+import { ICreateConversationBody } from '../dtos/message/conversation';
+import { withMiddy } from '../middlewares/withMiddy';
+import { createConversation } from '../services/conversation';
 import { InboxAPIGatewayEvent } from '../types/apigateway.interface';
+import { logger } from '../utils/logger';
 import { buildApiResponse } from '../utils/responseUtils';
 import { addConversationBodySchema as bodySchema } from '../validations/conversation';
 
-type IBody = z.infer<typeof bodySchema>;
-
-const addConversation = async (
-  event: InboxAPIGatewayEvent<IBody>,
+export const addConversation = async (
+  event: InboxAPIGatewayEvent<ICreateConversationBody>,
 ): Promise<APIGatewayProxyResult> => {
-  try {
-    console.log('addConversation event received:', event);
+  logger.debug('Received addConversation event: body', event.body);
 
-    await publishEvent(
-      "xplor/growth/transactional_messaging",
-      "com.xplortechnologies.growth.transactional_messaging.message.received",
-      { message: "hello world, from app"}
-    )
-    return buildApiResponse(201, { message: 'Conversation added successfully!' });    
-  } catch (error) {
-    return buildApiResponse(500, { message: 'Conversation added failed!' });    
-  }
+  const conversation = await createConversation(event.body);
 
+  const response: ApiResponseDTO<Conversation> = {
+    data: conversation,
+    status: ApiStatus.SUCCESS,
+    message: 'Conversation added successfully!',
+  };
+
+  return buildApiResponse(HTTP_STATUS.CREATED, response);
 };
 
-const handler = middy(addConversation)
+const handler = withMiddy(addConversation, {
+  useDatabaseConnection: true,
+  apiGateway: {
+    parse: { body: true },
+    validation: { bodySchema },
+  },
+});
 
 export { handler };

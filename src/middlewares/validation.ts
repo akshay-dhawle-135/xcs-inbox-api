@@ -1,56 +1,38 @@
 import type { Request } from '@middy/core';
 import middy from '@middy/core';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import createHttpError from 'http-errors';
-import { isEmpty } from 'lodash';
-import { z, ZodIssueCode } from 'zod';
-import HTTP_STATUS from '../constants/httpStatusCodes';
+import { z } from 'zod';
 import { InboxAPIGatewayEvent } from '../types/apigateway.interface';
+import { validateSchema } from '../utils/validation';
 
-interface InputProps<TBody, TPath, TQuery> {
+export interface ValidationInputProps<TBody, TPath, TQuery> {
   bodySchema?: z.ZodType<TBody>;
   pathSchema?: z.ZodType<TPath>;
   querySchema?: z.ZodType<TQuery>;
+  customValidation?: (event: InboxAPIGatewayEvent) => void;
 }
-
-const formatMessage = (issue: z.ZodIssue): string => {
-  const message =
-    issue.code === ZodIssueCode.invalid_type
-      ? `${issue.path.join('.')} is ${issue.message}`
-      : issue.message;
-  return message;
-};
-
-const validateSchema = <T>(schema: z.ZodType<T> | undefined, data: unknown, schemaType: string) => {
-  if (!schema && !isEmpty(data)) {
-    throw createHttpError(HTTP_STATUS.BAD_REQUEST, `Request ${schemaType} is not allowed`);
-  }
-  if (!schema) return;
-
-  const result = schema.safeParse(data || {});
-  if (!result.success) {
-    const message = formatMessage(result.error.errors[0]);
-    const fieldName = result.error.errors[0].path[0];
-    throw createHttpError(HTTP_STATUS.BAD_REQUEST, { message, metadata: { fieldName } });
-  }
-};
 
 const withValidation = <TBody, TPath, TQuery>({
   bodySchema,
   pathSchema,
   querySchema,
-}: InputProps<TBody, TPath, TQuery>): middy.MiddlewareObj<
+  customValidation,
+}: ValidationInputProps<TBody, TPath, TQuery>): middy.MiddlewareObj<
   InboxAPIGatewayEvent,
   APIGatewayProxyResult
 > => {
   return {
     before: ({
       event: { body, pathParameters, queryStringParameters },
+      event,
     }: Request<InboxAPIGatewayEvent, APIGatewayProxyResult>) => {
+      // either custom validation run or in built validation present in this middleware
+      if (customValidation) {
+        return customValidation(event);
+      }
+
       validateSchema(bodySchema, body, 'body');
-
       validateSchema(pathSchema, pathParameters, 'pathParameters');
-
       validateSchema(querySchema, queryStringParameters, 'queryStringParameters');
     },
   };

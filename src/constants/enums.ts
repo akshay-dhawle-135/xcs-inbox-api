@@ -1,3 +1,8 @@
+export enum ApiStatus {
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+}
+
 export enum MessageType {
   SMS = 'sms',
   MMS = 'mms',
@@ -62,4 +67,12 @@ export enum ConversationStatus {
   OPEN = 'open',
   CLOSED = 'closed',
   ARCHIVED = 'archived',
+}
+
+export enum QueryFailedErrorCode {
+  UNIQUE_VIOLATION = '23505',
+  FOREIGN_KEY_VIOLATION = '23503',
+  NOT_NULL_VIOLATION = '23502',
+  CHECK_VIOLATION = '23514',
+  SYNTAX_ERROR = '42601',
 }

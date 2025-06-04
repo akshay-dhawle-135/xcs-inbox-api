@@ -1,10 +1,15 @@
 import { z } from 'zod';
-import { MessageType } from '../constants/enums';
+import { MessageDirection, MessageSource } from '../constants/enums';
+import { paginationSchema } from './common';
 
 export const addMessageBodySchema = z.object({
   sender_contact_id: z.string().uuid(),
   message_body: z.string().min(1),
-  message_type: z.nativeEnum(MessageType),
+  direction: z.nativeEnum(MessageDirection),
+  message_source: z.nativeEnum(MessageSource),
+  provider_message_id: z.string().optional(),
+  replied_to_message_id: z.string().optional(),
+  metadata: z.record(z.any()).optional(),
 });
 
 export const addMessagePathSchema = z.object({
@@ -15,7 +20,4 @@ export const getConversationsMessagesPathSchema = z.object({
   conversationId: z.string().uuid(),
 });
 
-export const getConversationsMessagesQuerySchema = z.object({
-  limit: z.number().int().min(1).optional(),
-  offset: z.number().int().min(1).optional(),
-});
+export const getConversationsMessagesQuerySchema = paginationSchema;

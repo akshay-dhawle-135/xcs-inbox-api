@@ -1,6 +1,6 @@
-import { isFinite, toNumber, lowerCase, isString, mapValues, flow } from 'lodash';
-import { PaginationMetadata, PaginationParams } from '../types/common.interface';
+import { flow, isFinite, isString, lowerCase, mapValues, toNumber } from 'lodash';
 import ConfigService from '../config/config';
+import { PaginationMetaParams, PaginationMetadata } from '../types/common.interface';
 
 const { Config } = new ConfigService();
 
@@ -15,12 +15,13 @@ const transformValue = flow(convertToBoolean, convertToNumber);
 export const convertValues = (obj: Record<string, string | undefined> | {}) =>
   mapValues(obj, transformValue);
 
+// response format refer: https://messaging-docs.dev.xplorcs.com/docs/api/Templates#:~:text=Get%20a%20list%20of%20templates
 export function buildPaginationResponse<T>({
   page = Config.DEFAULT_PAGE_VALUE,
   limit = Config.DEFAULT_LIMIT_VALUE,
   data = [],
-}: PaginationParams<T>): PaginationMetadata<T> {
-  const total = data.length;
+  total,
+}: PaginationMetaParams<T>): PaginationMetadata<T> {
   const pageCount = Math.ceil(total / limit);
 
   return {
@@ -35,8 +36,8 @@ export function buildPaginationResponse<T>({
 }
 
 export function getPaginationParams(
-  page: number = Config.DEFAULT_PAGE_VALUE,
-  limit: number = Config.DEFAULT_LIMIT_VALUE,
+  page: number | undefined = Config.DEFAULT_PAGE_VALUE,
+  limit: number | undefined = Config.DEFAULT_LIMIT_VALUE,
 ) {
   return {
     skip: (page - 1) * limit,

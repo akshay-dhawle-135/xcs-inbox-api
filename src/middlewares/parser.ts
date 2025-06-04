@@ -6,14 +6,8 @@ import { convertValues } from '../utils/common';
 const withQueryAndPathParser = () => ({
   before: (request: Request<InboxAPIGatewayEvent, APIGatewayProxyResult>) => {
     const { queryStringParameters, pathParameters } = request.event;
-
-    if (queryStringParameters) {
-      request.event.queryStringParameters = convertValues(queryStringParameters);
-    }
-
-    if (pathParameters) {
-      request.event.pathParameters = convertValues(pathParameters);
-    }
+    request.event.queryStringParameters = convertValues(queryStringParameters ?? {});
+    request.event.pathParameters = convertValues(pathParameters ?? {});
   },
 });
 

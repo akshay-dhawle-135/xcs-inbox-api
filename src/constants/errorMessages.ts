@@ -5,6 +5,7 @@ const ERROR_MESSAGES = {
   DUPLICATE_ENTRY: 'A record with the same data already exists.',
   INTERNAL_SERVER_ERROR: 'An unexpected server error occurred. Please try again later.',
   SERVICE_UNAVAILABLE: 'Service is currently unavailable. Please try again later.',
+  DB_QUERY_ERROR: 'A database error occurred while processing your request.',
 };
 
 export default ERROR_MESSAGES;

@@ -1,16 +1,15 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { HttpError } from 'http-errors';
-
-interface ApiResponse<T> {
-  message?: string;
-  data?: T;
-  status: 'success' | 'error';
-  metadata?: object;
-}
+import ERROR_MESSAGES from '../constants/errorMessages';
+import { ApiResponseDTO } from '../dtos/common/apiResponse';
+import { logger } from './logger';
+import HTTP_STATUS from '../constants/httpStatusCodes';
+import { QueryFailedErrorCode } from '../constants/enums';
+import { QueryFailedError } from 'typeorm';
 
 const createApiResponse = <T>(
   statusCode: number,
-  responseData: ApiResponse<T>,
+  responseData: ApiResponseDTO<T>,
 ): APIGatewayProxyResult => ({
   statusCode,
   body: JSON.stringify(responseData),
@@ -20,6 +19,36 @@ export const buildApiResponse = <T>(statusCode: number, data: T): APIGatewayProx
   createApiResponse(statusCode, { status: 'success', ...data });
 
 export const buildApiErrorResponse = (error: Error | null): APIGatewayProxyResult => {
+  logger.error(error);
+
+  if (error instanceof QueryFailedError) {
+    let code = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    let message = error.driverError.detail;
+
+    switch (error.driverError.code) {
+      case QueryFailedErrorCode.UNIQUE_VIOLATION:
+        code = HTTP_STATUS.CONFLICT;
+        break;
+      case QueryFailedErrorCode.FOREIGN_KEY_VIOLATION:
+        code = HTTP_STATUS.BAD_REQUEST;
+        break;
+      case QueryFailedErrorCode.NOT_NULL_VIOLATION:
+        code = HTTP_STATUS.BAD_REQUEST;
+        break;
+      case QueryFailedErrorCode.CHECK_VIOLATION:
+        code = HTTP_STATUS.BAD_REQUEST;
+        break;
+      default:
+        message = ERROR_MESSAGES.DB_QUERY_ERROR;
+        break;
+    }
+
+    return createApiResponse(code, {
+      status: 'error',
+      message,
+    });
+  }
+
   if (error instanceof HttpError) {
     return createApiResponse(error.statusCode, {
       status: 'error',
@@ -27,26 +56,8 @@ export const buildApiErrorResponse = (error: Error | null): APIGatewayProxyResul
       ...(error.metadata && { metadata: error.metadata }),
     });
   }
-  return createApiResponse(500, { status: 'error', message: 'Internal Server Error' });
-};
-
-export const handleResponse = (statusCode: number, body: object) => {
-  return {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true,
-    },
-    statusCode,
-    body: JSON.stringify(body),
-  };
-};
-
-export const handleError = (error: Error) => {
-  console.error(error);
-  return {
-    statusCode: 500,
-    body: JSON.stringify({
-      message: 'Internal Server Error',
-    }),
-  };
+  return createApiResponse(HTTP_STATUS.INTERNAL_SERVER_ERROR, {
+    status: 'error',
+    message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+  });
 };

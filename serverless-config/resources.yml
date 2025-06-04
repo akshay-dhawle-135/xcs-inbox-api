@@ -1,0 +1,28 @@
+Resources:
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    # ApiGatewayMethod + base + (path params + var) + method type
+    # we can access this by using sls package method to see generated functions names
+    DependsOn:
+      - ApiGatewayMethodV1HealthDashcheckGet,
+      - ApiGatewayMethodV1ConversationsConversationidVarMessagesPost,
+      - ApiGatewayMethodV1ConversationsPost,
+      - ApiGatewayMethodV1ConversationsConversationidVarParticipantsPost,
+      - ApiGatewayMethodV1ConversationsGet,
+      - ApiGatewayMethodV1ConversationsConversationidVarGet,
+      - ApiGatewayMethodV1ConversationsConversationidVarMessagesGet      
+    Properties:
+      RestApiId:
+        Ref: ApiGatewayRestApi
+      StageName: ${opt:stage, "local"}  
+
+  ApiGatewayBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMappingV2
+    DependsOn: 
+      - ApiGatewayDeployment
+    Properties:
+      RestApiId: 
+        Ref: ApiGatewayRestApi
+      Stage: ${opt:stage, "local"}
+      BasePath: ${self:custom.apiGatewaySuffix}
+      DomainNameArn: ${self:custom.apiGatewayDomainArn}

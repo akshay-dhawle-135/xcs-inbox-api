@@ -1,0 +1,23 @@
+service: ${env:SERVICE_NAME_PREFIX, "inbox-api-local"}-database
+
+frameworkVersion: '3'
+configValidationMode: off
+
+useDotenv: true
+
+custom: ${file(../../../serverless-config/custom.yml)}
+
+package: ${file(../../../serverless-config/package.yml)}
+
+provider: ${file(../../../serverless-config/provider.yml)}
+
+functions:
+  databaseMigration:
+    name: ${self:service}-migrations
+    handler: migration.runMigrations
+    timeout: 60
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-plugin-datadog
+  - serverless-esbuild

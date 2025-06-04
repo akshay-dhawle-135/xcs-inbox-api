@@ -1,29 +1,39 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import { buildApiResponse } from '../utils/responseUtils';
-import { logger } from '../utils/logger';
-import middy from '@middy/core';
-import withLogger from '../middlewares/logger';
-import withValidation from '../middlewares/validation';
-import { z } from 'zod';
-import { withErrorHandler } from '../middlewares/error';
+import { buildPaginationResponse } from '../../src/utils/common';
+import HTTP_STATUS from '../constants/httpStatusCodes';
+import { IGetConversationQuery as IQuery } from '../dtos/message/conversation';
+import { withMiddy } from '../middlewares/withMiddy';
+import { fetchConversations } from '../services/conversation';
 import { InboxAPIGatewayEvent } from '../types/apigateway.interface';
-import httpJsonBodyParser from '@middy/http-json-body-parser';
-import withQueryAndPathParser from '../middlewares/parser';
+import { logger } from '../utils/logger';
+import { buildApiResponse } from '../utils/responseUtils';
 import { getConversationsQuerySchema as querySchema } from '../validations/conversation';
 
-type IQuery = z.infer<typeof querySchema>;
-type Event = InboxAPIGatewayEvent<unknown, unknown, IQuery>;
+type InboxEvent = InboxAPIGatewayEvent<unknown, unknown, IQuery>;
 
-const getConversations = async (event: Event): Promise<APIGatewayProxyResult> => {
-  logger.info('getConversations event received:', event);
-  return buildApiResponse(200, { message: 'Conversations fetched successfully!' });
+const getConversations = async (event: InboxEvent): Promise<APIGatewayProxyResult> => {
+  logger.info('Received getConversations event:', event.queryStringParameters);
+
+  const { limit, offset } = event.queryStringParameters;
+
+  const [conversations, total] = await fetchConversations({ offset, limit });
+
+  const response = buildPaginationResponse({
+    page: offset,
+    limit: limit,
+    data: conversations,
+    total,
+  });
+
+  return buildApiResponse(HTTP_STATUS.OK, response);
 };
 
-const handler = middy(getConversations)
-  .use(httpJsonBodyParser())
-  .use(withQueryAndPathParser())
-  .use(withLogger())
-  .use(withValidation({ querySchema }))
-  .use(withErrorHandler());
+const handler = withMiddy(getConversations, {
+  apiGateway: {
+    parse: { body: true, query: true },
+    validation: { querySchema },
+  },
+  useDatabaseConnection: true,
+});
 
 export { handler };

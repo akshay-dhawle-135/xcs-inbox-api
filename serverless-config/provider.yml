@@ -1,0 +1,29 @@
+name: aws
+region: ${env:AWS_REGION, "us-east-1"}
+runtime: nodejs20.x
+endpointType: PRIVATE
+apiGateway:
+  resourcePolicy:
+    - Effect: Allow
+      Principal: '*'
+      Action: execute-api:Invoke
+      Resource: execute-api:/*
+
+# environment:
+  # DB_HOST: ${env:DB_HOST, ssm:${self:custom.secretsPrefix}/DB_HOST}
+  # DB_PORT: ${env:DB_PORT, ssm:${self:custom.secretsPrefix}/DB_PORT}
+  # DB_USERNAME: ${env:DB_USERNAME, ssm:${self:custom.secretsPrefix}/DB_USERNAME}
+  # DB_PASSWORD: ${env:DB_PASSWORD, ssm:${self:custom.secretsPrefix}/DB_PASSWORD}
+  # DB_NAME: ${env:DB_NAME, ssm:${self:custom.secretsPrefix}/DB_NAME}
+  # XPLOR_GROWTH_EVENT_BUS_NAME: ${env:XPLOR_GROWTH_EVENT_BUS_NAME, ssm:${self:custom.secretsPrefix}/XPLOR_GROWTH_EVENT_BUS_NAME}
+  # INBOX_API_EVENT_BUS_SOURCE_NAME: ${env:INBOX_API_EVENT_BUS_SOURCE_NAME, ssm:${self:custom.secretsPrefix}/INBOX_API_EVENT_BUS_SOURCE_NAME}
+  # INBOX_API_EVENT_BUS_DETAIL_TYPE_PREFIX: ${env:INBOX_API_EVENT_BUS_DETAIL_TYPE_PREFIX, ssm:${self:custom.secretsPrefix}/INBOX_API_EVENT_BUS_DETAIL_TYPE_PREFIX}
+
+iam:
+  role:
+    name: ${self:service}-exec-role
+    managedPolicies: ${env:EXECUTION_ROLE_SUPPLEMENTAL_POLICY_ARN, ssm:${self:custom.secretsPrefix}/EXECUTION_ROLE_SUPPLEMENTAL_POLICY_ARN, null}
+
+# vpc:
+#   subnetIds: ${env:SUBNET_IDS, ssm:${self:custom.secretsPrefix}/SUBNET_IDS}
+#   securityGroupIds: ${env:SECURITY_GROUP_IDS, ssm:${self:custom.secretsPrefix}/SECURITY_GROUP_IDS}

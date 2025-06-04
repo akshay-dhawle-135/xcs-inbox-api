@@ -1,32 +1,48 @@
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import { buildApiResponse } from '../utils/responseUtils';
+import { ApiStatus } from '../constants/enums';
+import HTTP_STATUS from '../constants/httpStatusCodes';
+import { Message } from '../database/entities/Message';
+import { ApiResponseDTO } from '../dtos/common/apiResponse';
+import { ICreateMessageBody, ICreateMessagePath } from '../dtos/message/message';
+import { withMiddy } from '../middlewares/withMiddy';
+import { databaseValidations, saveMessage } from '../services/message';
+import { InboxAPIGatewayEvent } from '../types/apigateway.interface';
 import { logger } from '../utils/logger';
-import middy from '@middy/core';
-import withLogger from '../middlewares/logger';
-import withValidation from '../middlewares/validation';
-import { z } from 'zod';
+import { buildApiResponse } from '../utils/responseUtils';
 import {
   addMessageBodySchema as bodySchema,
   addMessagePathSchema as pathSchema,
 } from '../validations/message';
-import { withErrorHandler } from '../middlewares/error';
-import httpJsonBodyParser from '@middy/http-json-body-parser';
-import { InboxAPIGatewayEvent } from '../types/apigateway.interface';
-
-type IBody = z.infer<typeof bodySchema>;
-type IPath = z.infer<typeof pathSchema>;
 
 const addMessage = async (
-  event: InboxAPIGatewayEvent<IBody, IPath>,
+  event: InboxAPIGatewayEvent<ICreateMessageBody, ICreateMessagePath>,
 ): Promise<APIGatewayProxyResult> => {
-  logger.info('addMessage event received:', event);
-  return buildApiResponse(201, { message: 'Message added successfully!' });
+  logger.debug('Received addMessage event: body', event.body);
+
+  const { conversationId: conversation_id } = event.pathParameters;
+  const messageBody = { ...event.body, conversation_id };
+
+  await databaseValidations({
+    conversationId: conversation_id,
+    contactId: messageBody.sender_contact_id,
+  });
+
+  const message = await saveMessage(messageBody);
+
+  const response: ApiResponseDTO<Message> = {
+    data: message,
+    status: ApiStatus.SUCCESS,
+    message: 'Message added successfully!',
+  };
+  return buildApiResponse(HTTP_STATUS.CREATED, response);
 };
 
-const handler = middy(addMessage)
-  .use(httpJsonBodyParser())
-  .use(withLogger())
-  .use(withValidation({ bodySchema, pathSchema }))
-  .use(withErrorHandler());
+const handler = withMiddy(addMessage, {
+  useDatabaseConnection: true,
+  apiGateway: {
+    parse: { body: true },
+    validation: { bodySchema, pathSchema },
+  },
+});
 
 export { handler };

@@ -1,0 +1,11 @@
+dotenv: ${file(./custom-dotenv.yml), null}
+secretsPrefix: '/${env:SERVICE_NAME_PREFIX, "local"}'
+stage: '${opt:stage, self:provider.stage, "local"}'
+stackName: '${self:service}'
+apiGatewaySuffix: ${env:API_GATEWAY_SUFFIX, ssm:${self:custom.secretsPrefix}/API_GATEWAY_SUFFIX, "inbox"}
+apiGatewayDomainArn: ${env:API_GATEWAY_CUSTOM_DOMAIN_ARN, ssm:${self:custom.secretsPrefix}/API_GATEWAY_CUSTOM_DOMAIN_ARN}
+# datadog:
+#   site: datadoghq.com
+#   apiKey: '${env:DD_API_KEY, ssm:${self:custom.secretsPrefix}/DD_API_KEY}'
+#   appKey: '${env:DD_APP_KEY, ssm:${self:custom.secretsPrefix}/DD_APP_KEY}'
+#   forwarderArn: '${env:DD_FORWARDER_ARN, ssm:${self:custom.secretsPrefix}/DD_FORWARDER_ARN}'

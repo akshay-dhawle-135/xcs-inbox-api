@@ -1,0 +1,6 @@
+plugins:
+  - serverless-dotenv-plugin
+  # - serverless-domain-manager
+  # - serverless-plugin-datadog
+  - serverless-offline
+  - serverless-esbuild

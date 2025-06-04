@@ -1,17 +1,10 @@
-import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+import type { APIGatewayEvent } from 'aws-lambda';
+import HTTP_STATUS from '../constants/httpStatusCodes';
+import { buildApiResponse } from '../utils/responseUtils';
 
-export const handler = async (
-  event: APIGatewayEvent,
-): Promise<APIGatewayProxyResult> => {
-  console.log("Received event:", event);  
-
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: "Conversation Added!",
-      input: event,
-    }),
-  };
-
-  return response;
+const handler = async (event: APIGatewayEvent) => {
+  const response = { message: 'Your function executed successfully!', input: event };
+  return buildApiResponse(HTTP_STATUS.OK, response);
 };
+
+export { handler };
