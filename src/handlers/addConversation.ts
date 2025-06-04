@@ -15,6 +15,7 @@ export const addConversation = async (
   event: InboxAPIGatewayEvent<ICreateConversationBody>,
 ): Promise<APIGatewayProxyResult> => {
   logger.debug('Received addConversation event: body', event.body);
+  
 
   const conversation = await createConversation(event.body);
 
