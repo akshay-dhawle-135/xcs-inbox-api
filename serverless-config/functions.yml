@@ -49,18 +49,18 @@ getConversationMessages:
 
 addReceivedMessage:
   handler: src/handlers/addReceivedMessage.handler
-  # events:
-  #   - sqs:
-  #       arn: ${env:RECEIVED_MESSAGE_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/RECEIVED_MESSAGE_SQS_QUEUE_ARN}
+  events:
+    - sqs:
+        arn: ${env:RECEIVED_MESSAGE_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/RECEIVED_MESSAGE_SQS_QUEUE_ARN}
 
 addSentMessage:
   handler: src/handlers/addSentMessage.handler
-  # events:
-  #   - sqs:
-  #       arn: ${env:SENT_MESSAGE_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/SENT_MESSAGE_SQS_QUEUE_ARN}
+  events:
+    - sqs:
+        arn: ${env:SENT_MESSAGE_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/SENT_MESSAGE_SQS_QUEUE_ARN}
 
 updateMessageStatus:
   handler: src/handlers/updateMessageStatus.handler
-  # events:
-  #   - sqs:
-  #       arn: ${env:MESSAGE_STATUS_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/MESSAGE_STATUS_SQS_QUEUE_ARN}
+  events:
+    - sqs:
+        arn: ${env:MESSAGE_STATUS_SQS_QUEUE_ARN, ssm:${self:custom.secretsPrefix}/MESSAGE_STATUS_SQS_QUEUE_ARN}
